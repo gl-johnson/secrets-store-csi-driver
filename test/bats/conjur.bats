@@ -1,18 +1,25 @@
 #!/usr/bin/env bats
 
- load helpers
+load helpers
 
- BATS_TESTS_DIR=test/bats/tests/conjur
- WAIT_TIME=180
- SLEEP_TIME=1
+BATS_TESTS_DIR=test/bats/tests/conjur
+WAIT_TIME=180
+SLEEP_TIME=1
 
- CONJUR_NAMESPACE=conjur
- CONJUR_DATA_KEY="$(openssl rand -base64 32)"
- CONJUR_ACCOUNT=default
- CONJUR_URL=conjur-conjur-oss.conjur.svc.cluster.local
+CONJUR_NAMESPACE=conjur
+CONJUR_DATA_KEY="$(openssl rand -base64 32)"
+CONJUR_ACCOUNT=default
+CONJUR_URL=conjur-conjur-oss.conjur.svc.cluster.local
 
- EXPECTED_USERNAME="some_user"
- EXPECTED_PASSWORD="SecretPassword1234!"
+EXPECTED_USERNAME="some_user"
+EXPECTED_PASSWORD="SecretPassword1234!"
+
+@test "allow conjur provider token requests" {
+  helm upgrade csi-secrets-store manifest_staging/charts/secrets-store-csi-driver --namespace kube-system \
+    --set 'tokenRequests[0].audience=conjur'
+  
+  kubectl wait --for=condition=ready --timeout=${WAIT_TIME}s --namespace=kube-system pod -l "app=secrets-store-csi-driver"
+}
 
 @test "install conjur provider" { 
   # Update Helm repos
@@ -23,18 +30,13 @@
   kubectl create namespace $CONJUR_NAMESPACE 
 
   # Install Conjur
-  helm install conjur cyberark/conjur-oss \
-    --namespace $CONJUR_NAMESPACE \
-    --wait --timeout ${WAIT_TIME}s \
+  helm install conjur cyberark/conjur-oss --namespace $CONJUR_NAMESPACE --wait --timeout ${WAIT_TIME}s \
     --set dataKey=$CONJUR_DATA_KEY \
     --set authenticators="authn\,authn-jwt/kube" \
     --set service.external.enabled=false
 
   # Install Conjur CSI Provider
-  helm install conjur-csi-provider \
-    cyberark/conjur-k8s-csi-provider \
-    --wait --timeout ${WAIT_TIME}s \
-    --namespace kube-system \
+  helm install conjur-csi-provider cyberark/conjur-k8s-csi-provider --wait --timeout ${WAIT_TIME}s --namespace kube-system \
     --set providerServer.image.tag=latest
 } 
 
