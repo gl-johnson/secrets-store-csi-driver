@@ -494,6 +494,10 @@ e2e-gcp:
 e2e-aws:
 	bats -t test/bats/aws.bats
 
+.PHONY: e2e-conjur
+e2e-conjur:
+	bats -t test/bats/conjur.bats
+
 ## --------------------------------------
 ## Generate
 ## --------------------------------------
