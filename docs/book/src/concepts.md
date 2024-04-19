@@ -29,6 +29,7 @@ Currently supported providers:
 - [Akeyless Provider](https://github.com/akeylesslabs/akeyless-csi-provider)
 - [AWS Provider](https://github.com/aws/secrets-store-csi-driver-provider-aws)
 - [Azure Provider](https://azure.github.io/secrets-store-csi-driver-provider-azure/)
+- [Conjur Provider](https://github.com/cyberark/conjur-k8s-csi-provider)
 - [GCP Provider](https://github.com/GoogleCloudPlatform/secrets-store-csi-driver-provider-gcp)
 - [Vault Provider](https://github.com/hashicorp/secrets-store-csi-driver-provider-vault)
 
@@ -75,7 +76,7 @@ kind: SecretProviderClass
 metadata:
   name: my-provider
 spec:
-  provider: vault                             # accepted provider options: akeyless or azure or vault or gcp
+  provider: vault                             # accepted provider options: akeyless, azure, conjur, vault, gcp
   parameters:                                 # provider-specific parameters
 ```
 
